@@ -4,7 +4,7 @@ extends PanelContainer
 @export var normal: StyleBox
 @export var custom: StyleBox
 
-enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR, QUICK_LOAD}
+enum MenuOption {EDIT, REMOVE, REFRESH, CLEAR, QUICK_LOAD, SHOW_IN_FILESYSTEM}
 
 @onready var icon := $Icon
 @onready var loading_icon = $Loading
@@ -117,6 +117,10 @@ func _gui_input(event: InputEvent) -> void:
 			popup.position = get_screen_transform() * event.position
 		elif event.double_click and event.button_index == MOUSE_BUTTON_LEFT and not scene.is_empty():
 			menu_option(MenuOption.EDIT)
+		elif event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+			if Input.is_key_pressed(KEY_CTRL):
+				EditorInterface.get_file_system_dock().navigate_to_path(scene) # show in filesystem
+	
 
 func create_popup():
 	if not popup:
@@ -135,6 +139,7 @@ func create_popup():
 			popup.add_item("Refresh Icon", MenuOption.REFRESH)
 	
 	popup.add_item("Quick Load", MenuOption.QUICK_LOAD)
+	popup.add_item("Show in FileSystem", MenuOption.SHOW_IN_FILESYSTEM)
 	
 	popup.reset_size()
 
@@ -171,6 +176,8 @@ func menu_option(id: int) -> void:
 				popup = resource_picker.get_child(2)
 			
 			popup.id_pressed.emit(1)
+		MenuOption.SHOW_IN_FILESYSTEM:
+			EditorInterface.get_file_system_dock().navigate_to_path(scene)
 
 func get_data() -> Dictionary:
 	if scene.is_empty():
@@ -189,7 +196,8 @@ func set_data(data: Dictionary):
 func apply_data():
 	tooltip_text = scene.get_file()
 	set_icon(null)
-	add_theme_stylebox_override(&"panel", normal)
+	if normal:
+		add_theme_stylebox_override(&"panel", normal)
 	
 	if scene.is_empty():
 		set_icon(null)
@@ -198,7 +206,8 @@ func apply_data():
 		request_icon.emit(scene, false)
 	else:
 		set_icon(load(custom_texture))
-		add_theme_stylebox_override(&"panel", custom)
+		if custom:
+			add_theme_stylebox_override(&"panel", custom)
 
 func start_load():
 	loading_animator.play(&"Rotate")

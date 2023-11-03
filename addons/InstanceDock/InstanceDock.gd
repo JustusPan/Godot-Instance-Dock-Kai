@@ -1,5 +1,5 @@
 @tool
-extends PanelContainer
+extends Panel
 
 const PROJECT_SETTING = "addons/instance_dock/scenes"
 const PREVIEW_SIZE = Vector2i(64, 64)
@@ -7,6 +7,8 @@ const PREVIEW_SIZE = Vector2i(64, 64)
 @onready var tabs := %Tabs
 @onready var tab_add_confirm := %AddTabConfirm
 @onready var tab_add_name := %AddTabName
+@onready var tab_rename_confirm := %RenameTabConfirm
+@onready var tab_rename_name := %RenameTabName
 @onready var tab_delete_confirm := %DeleteConfirm
 
 @onready var scroll := %ScrollContainer
@@ -56,6 +58,35 @@ func _notification(what: int) -> void:
 			refresh_tab_contents()
 			initialized = 2
 
+func on_rename_tab_pressed() -> void:
+	if tabs.current_tab < 0 or tabs.current_tab >= tabs.tab_count:
+		return
+	tab_rename_name.text = tabs.get_tab_title(tabs.current_tab)
+	tab_rename_confirm.popup_centered()
+	tab_rename_name.grab_focus().call_deferred()
+
+func rename_tab_confirm(q = null) -> void:
+	if q != null:
+		tab_rename_confirm.hide()
+	if tab_rename_name.text.is_empty():
+		return
+		
+	var old_name = tabs.get_tab_title(tabs.current_tab)
+	var new_name = tab_rename_name.text
+	tabs.set_tab_title(tabs.current_tab,new_name)
+	
+	#update data
+	for tab_info in data:
+		if tab_info.has("name") and tab_info.name == old_name:
+			tab_info.name = new_name
+			break
+	ProjectSettings.save()
+
+func on_remove_tab_pressed() -> void:
+	if tabs.current_tab < 0 or tabs.current_tab >= tabs.tab_count:
+		return
+	on_tab_close_attempt(tabs.current_tab)
+
 func on_add_tab_pressed() -> void:
 	tab_add_name.text = ""
 	tab_add_confirm.popup_centered()
@@ -72,8 +103,10 @@ func add_tab_confirm(q = null) -> void:
 	if data.size() == 1:
 		refresh_tab_contents()
 
+
 func on_tab_close_attempt(tab: int) -> void:
 	tab_to_remove = tab
+	tab_delete_confirm.dialog_text = "Will removed '%s' permanently. Continue?" % tabs.get_tab_title(tab_to_remove)
 	tab_delete_confirm.popup_centered()
 
 func remove_tab_confirm() -> void:
@@ -159,7 +192,15 @@ func _process(delta: float) -> void:
 			if instance is Node2D:
 				instance.position = PREVIEW_SIZE / 2
 		3:
-			var image = icon_generator.get_texture().get_image()
+			var image;
+			
+			# ark extension, use preview if exist
+			var preview_texture: Texture2D = get_preview_icon(instance)
+			if preview_texture:
+				image = preview_texture.get_image()
+			else:
+				image = icon_generator.get_texture().get_image()
+				
 			image.save_png(".godot/InstanceIconCache/%s.png" % slot.scene.hash())
 			var texture = ImageTexture.create_from_image(image)
 			slot.set_icon(texture)
@@ -232,3 +273,11 @@ func adjust_slot_count():
 	
 	while desired_slots < slot_container.get_child_count():
 		slot_container.get_child(slot_container.get_child_count() - 1).free()
+
+#region ark-extension
+func get_preview_icon(object:Object) -> Texture2D:
+	if object.has_meta("preview") and object.get_meta("preview") and object.get_meta("preview") is Texture2D:
+		return object.get_meta("preview")
+	else:
+		return null
+#endregion 

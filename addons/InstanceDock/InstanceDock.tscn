@@ -2,14 +2,21 @@
 
 [ext_resource type="Script" path="res://addons/InstanceDock/InstanceDock.gd" id="2"]
 
-[node name="Instances" type="PanelContainer"]
-anchors_preset = 9
+[node name="Instances" type="Panel"]
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 350.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("2")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -19,10 +26,17 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-tab_close_display_policy = 1
 drag_to_rearrange_enabled = true
 
-[node name="Button" type="Button" parent="VBoxContainer/HBoxContainer"]
+[node name="RemoveTabButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "-"
+
+[node name="RenameTabButton" type="Button" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Rename"
+
+[node name="AddTabButton" type="Button" parent="VBoxContainer/HBoxContainer"]
 layout_mode = 2
 text = "+"
 
@@ -65,9 +79,26 @@ dialog_text = "This will permanently remove the tab. Continue?"
 
 [node name="AddTabConfirm" type="ConfirmationDialog" parent="Dialogs"]
 unique_name_in_owner = true
+position = Vector2i(0, 36)
 size = Vector2i(200, 88)
 
 [node name="AddTabName" type="LineEdit" parent="Dialogs/AddTabConfirm"]
+unique_name_in_owner = true
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 39.0
+placeholder_text = "Tab name"
+
+[node name="RenameTabConfirm" type="ConfirmationDialog" parent="Dialogs"]
+unique_name_in_owner = true
+title = "Rename Tab ..."
+position = Vector2i(0, 36)
+size = Vector2i(200, 88)
+
+[node name="RenameTabName" type="LineEdit" parent="Dialogs/RenameTabConfirm"]
 unique_name_in_owner = true
 anchors_preset = 10
 anchor_right = 1.0
@@ -83,7 +114,11 @@ render_target_update_mode = 3
 
 [connection signal="tab_changed" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_changed"]
 [connection signal="tab_close_pressed" from="VBoxContainer/HBoxContainer/Tabs" to="." method="on_tab_close_attempt"]
-[connection signal="pressed" from="VBoxContainer/HBoxContainer/Button" to="." method="on_add_tab_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/RemoveTabButton" to="." method="on_remove_tab_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/RenameTabButton" to="." method="on_rename_tab_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/AddTabButton" to="." method="on_add_tab_pressed"]
 [connection signal="confirmed" from="Dialogs/DeleteConfirm" to="." method="remove_tab_confirm"]
 [connection signal="confirmed" from="Dialogs/AddTabConfirm" to="." method="add_tab_confirm"]
 [connection signal="text_submitted" from="Dialogs/AddTabConfirm/AddTabName" to="." method="add_tab_confirm"]
+[connection signal="confirmed" from="Dialogs/RenameTabConfirm" to="." method="rename_tab_confirm"]
+[connection signal="text_submitted" from="Dialogs/RenameTabConfirm/RenameTabName" to="." method="rename_tab_confirm"]

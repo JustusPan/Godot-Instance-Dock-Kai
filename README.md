@@ -1,3 +1,34 @@
+# Godot Instance Dock Kai v1.0.0
+This is folk of [Godot Instance Dock](https://github.com/KoBeWi/Godot-Instance-Dock) which is made by [KoBeWi](https://github.com/KoBeWi).
+
+The initial version of Godot Instance Dock is v1.2.4
+
+## Godot Version
+- v4.x
+
+## Main Features & Changes of Kai
+### Features
+- if there is a metadate name 'preview', and with type Texture2D on the root node of packedscene, it will be displayed as icon in 'Instance Dock' instead of the generation one.
+- add a rename button on the top-right
+- add 'Show In FileSystem' option on the context menu of slots.
+- `Ctrl+LMB` click on a slot when `Ctrl` is pressing will `Shot In FileSystem` directly. 
+  
+### Changes vs original Godot Instance Dock
+- add the scene panel to the bottom panel instead
+- hide the delete button on the tabs. and use a `delete button` which on the top-right side instead
+- change the root node type to Panel instead of PanelContainer to make interface more compact (because default theme of godot will give big content margin to PanelContainer)
+
+## plans
+- add scenes in batch mode 
+
+
+## known issues
+- change position of tabs will cause content mismatch
+
+
+
+The origianl readme content has been attached blow.
+
 # <img src="https://github.com/KoBeWi/Godot-Instance-Dock/blob/master/Media/Icon.png" width="64" height="64"> Godot Instance Dock
 Addon for Godot that adds a handy dock where you can store scenes.
 
